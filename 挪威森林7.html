@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你好哇 · 那些温柔的事物</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        
+        body {
+            background: #1a1a1a;
+            color: #e8e4df;
+            font-family: 'Noto Serif SC', serif;
+            line-height: 1.8;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 1000;
+        }
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 3px);
+            pointer-events: none; z-index: 1001;
+        }
+        
+        img { opacity: 0; transition: opacity 0.8s ease-in-out; }
+        img.loaded { opacity: 1; }
+        
+        .hero-screen {
+            position: relative; width: 100%; height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(180deg, #1a1a1a 0%, #2d1f2f 50%, #1a1a1a 100%);
+            overflow: hidden; z-index: 10;
+        }
+        .hero-float {
+            position: absolute; opacity: 0.12;
+            animation: heroFloat 6s ease-in-out infinite; pointer-events: none;
+        }
+        .hero-float-1 { top: 12%; left: 10%; font-size: 4rem; }
+        .hero-float-2 { top: 18%; right: 12%; font-size: 3rem; animation-delay: 1.2s; }
+        .hero-float-3 { bottom: 22%; left: 8%; font-size: 2.5rem; animation-delay: 2.4s; }
+        .hero-float-4 { bottom: 16%; right: 14%; font-size: 3.5rem; animation-delay: 3.6s; }
+        
+        @keyframes heroFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-22px) rotate(4deg); }
+        }
+        
+        .hero-title {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: clamp(3rem, 7vw, 5rem);
+            color: #fff; letter-spacing: 10px;
+            text-shadow: 0 0 50px rgba(255,182,193,0.5);
+            animation: heroBreathe 4s ease-in-out infinite;
+            position: relative; z-index: 2; text-align: center; user-select: none;
+        }
+        @keyframes heroBreathe {
+            0%, 100% { text-shadow: 0 0 40px rgba(255,182,193,0.5); }
+            50% { text-shadow: 0 0 70px rgba(255,182,193,0.8), 0 0 100px rgba(255,182,193,0.3); }
+        }
+        .hero-subtitle {
+            font-size: 1.1rem; color: rgba(255,255,255,0.55);
+            letter-spacing: 6px; margin-top: 1.5rem;
+            position: relative; z-index: 2; text-align: center; user-select: none;
+        }
+        .hero-scroll {
+            position: absolute; bottom: 3rem; left: 50%; transform: translateX(-50%);
+            color: rgba(255,182,193,0.5); font-size: 0.85rem; letter-spacing: 2px;
+            animation: bounce 2s infinite; z-index: 2;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+        
+        /* ============ ☘️ 独立导航 ============ */
+        .clover-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+            transition: opacity 0.3s ease;
+        }
+        .clover-container.hidden-state {
+            opacity: 0.25;
+        }
+        .clover-container.hidden-state .clover-menu {
+            pointer-events: none !important;
+        }
+        
+        .clover-main {
+            width: 45px; height: 45px; border-radius: 50%;
+            background: rgba(26,26,26,0.9);
+            border: 2px solid rgba(255,182,193,0.5);
+            color: #ffb6c1; font-size: 1.3rem;
+            cursor: grab;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            order: 1;
+        }
+        .clover-main:active {
+            cursor: grabbing;
+        }
+        .clover-main:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 30px rgba(255,182,193,0.35);
+        }
+        .clover-main.active {
+            background: rgba(255,182,193,0.25); border-color: #fff; color: #fff;
+        }
+        
+        /* 🍀 幸运四叶草动画 */
+        .clover-main.lucky {
+            animation: luckyPulse 0.6s ease-out;
+        }
+        @keyframes luckyPulse {
+            0% { transform: scale(1); box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+            30% { transform: scale(1.35); box-shadow: 0 0 55px rgba(100,255,150,0.85); border-color: #7effa0; }
+            100% { transform: scale(1); box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        }
+        
+        .clover-menu {
+            display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+            max-height: 0; overflow: hidden; opacity: 0;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+            padding-top: 0; pointer-events: none;
+            order: 2;
+        }
+        .clover-menu.open {
+            max-height: 250px; opacity: 1;
+            padding-top: 0.7rem; pointer-events: auto;
+        }
+        
+        .clover-item {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(26,26,26,0.88);
+            border: 1.5px solid rgba(255,182,193,0.35);
+            color: #ffb6c1; font-size: 1.1rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.35s ease;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+            text-decoration: none;
+        }
+        .clover-item:hover {
+            background: rgba(255,182,193,0.2); border-color: #ffb6c1;
+            transform: scale(1.15);
+            box-shadow: 0 0 22px rgba(255,182,193,0.3);
+        }
+        
+        /* 拖动时样式 */
+        .clover-container.dragging {
+            opacity: 0.85;
+        }
+        .clover-container.dragging .clover-main {
+            cursor: grabbing;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        }
+        
+        /* ============ 🌸 回到顶部 ============ */
+        .back-to-top {
+            position: fixed; bottom: 2rem; right: 6rem;
+            width: 45px; height: 45px; border-radius: 50%;
+            background: rgba(26,26,26,0.9);
+            border: 1.5px solid rgba(255,182,193,0.45);
+            color: #ffb6c1; font-size: 1.3rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 3px 15px rgba(0,0,0,0.35);
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        .back-to-top:hover {
+            background: rgba(255,182,193,0.2); border-color: #ffb6c1;
+            box-shadow: 0 5px 22px rgba(255,182,193,0.3);
+            transform: scale(1.08);
+        }
+        
+        /* 文章 */
+        .main-content {
+            position: relative; z-index: 1; max-width: 750px;
+            margin: 0 auto; padding: 4rem 5vw 4rem;
+        }
+        .page-card {
+            background: linear-gradient(160deg, rgba(40,30,45,0.7), rgba(25,20,30,0.8));
+            border: 1px solid rgba(255,182,193,0.1); border-radius: 14px;
+            padding: 2.5rem 2.5rem 2rem; margin-bottom: 3rem; position: relative;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.25); transition: all 0.4s; overflow: visible;
+        }
+        .page-card::after {
+            content: ''; position: absolute; bottom: 0; right: 0;
+            width: 30px; height: 30px;
+            background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.3) 50%);
+            border-radius: 0 0 14px 0; pointer-events: none;
+        }
+        .page-card:hover {
+            border-color: rgba(255,182,193,0.3);
+            box-shadow: 0 12px 50px rgba(0,0,0,0.35); transform: translateY(-3px);
+        }
+        .section-label {
+            display: inline-block; font-family: 'Ma Shan Zheng', cursive;
+            font-size: 2rem; color: #fff; margin-bottom: 1.5rem; letter-spacing: 3px;
+            padding-bottom: 0.4rem; border-bottom: 2px solid rgba(255,182,193,0.2);
+        }
+        .entry-block {
+            margin-bottom: 2.2rem; padding-bottom: 2rem;
+            border-bottom: 1px dashed rgba(255,255,255,0.06);
+        }
+        .entry-block:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .entry-image {
+            width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px;
+            margin-bottom: 1.2rem; border: 2px solid rgba(255,182,193,0.15); display: block;
+        }
+        .entry-title {
+            font-family: 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+            font-size: 1.4rem; color: #fff; margin-bottom: 0.3rem; letter-spacing: 2px;
+        }
+        .entry-quote {
+            color: rgba(255,182,193,0.75); font-size: 0.9rem; font-style: italic;
+            margin-bottom: 0.8rem; padding-left: 1rem; border-left: 2px solid rgba(255,182,193,0.3);
+        }
+        .entry-text {
+            color: rgba(255,255,255,0.7); font-size: 0.95rem; line-height: 2; text-align: justify;
+        }
+        
+        .music-entry .entry-image-wrap {
+            position: relative; border-radius: 8px; overflow: hidden;
+            margin-bottom: 1.2rem; border: 2px solid rgba(255,182,193,0.15);
+        }
+        .music-entry .entry-image { margin-bottom: 0; border: none; border-radius: 0; }
+        .music-entry .entry-image-wrap::after {
+            content: '▶'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 2rem; color: rgba(255,255,255,0.75); background: rgba(0,0,0,0.35);
+            width: 55px; height: 55px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none; transition: all 0.3s; backdrop-filter: blur(3px);
+        }
+        .music-entry:hover .entry-image-wrap::after {
+            transform: translate(-50%, -50%) scale(1.12);
+            background: rgba(0,0,0,0.55); box-shadow: 0 0 25px rgba(255,182,193,0.35);
+        }
+        
+        .game-entry .entry-image-wrap {
+            overflow: hidden; border-radius: 8px; margin-bottom: 1.2rem;
+            border: 2px solid rgba(255,182,193,0.15);
+        }
+        .game-entry .entry-image {
+            margin-bottom: 0; border: none; border-radius: 0;
+            animation: slowZoom 14s ease-in-out infinite;
+        }
+        @keyframes slowZoom {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+        
+        .about-card { text-align: center; margin-top: 1rem; }
+        .about-avatar {
+            width: 180px; height: 180px; border-radius: 50%; object-fit: cover;
+            border: 3px solid rgba(255,182,193,0.25);
+            box-shadow: 0 0 30px rgba(255,182,193,0.1); margin-bottom: 1.5rem;
+        }
+        
+        .comments-section {
+            margin-top: 2rem; padding-top: 2rem;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+        }
+        .comments-heading {
+            font-family: 'Ma Shan Zheng', cursive; font-size: 1.8rem;
+            color: #fff; margin-bottom: 1.2rem; text-align: center; letter-spacing: 3px;
+        }
+        .comment-input {
+            width: 100%; background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,182,193,0.25); border-radius: 8px;
+            color: #fff; padding: 1rem; font-family: inherit; font-size: 0.95rem;
+            margin-bottom: 0.8rem; resize: vertical; min-height: 80px; transition: border-color 0.3s;
+        }
+        .comment-input:focus { outline: none; border-color: #ffb6c1; }
+        .comment-input::placeholder { color: rgba(255,255,255,0.35); }
+        .comment-btn {
+            background: linear-gradient(135deg, #ffb6c1, #d4a5a5);
+            color: #2d2d2d; border: none; padding: 0.6rem 2rem; border-radius: 25px;
+            font-family: inherit; font-size: 0.95rem; cursor: pointer;
+            transition: all 0.3s; font-weight: 600;
+        }
+        .comment-btn:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(255,182,193,0.3); }
+        .comment-btn.success { background: linear-gradient(135deg, #a5d6a7, #81c784); color: #fff; pointer-events: none; }
+        .comment-btn.success::after { content: ' ✓'; }
+        .comment-list { margin-top: 1.2rem; }
+        .comment-item {
+            padding: 0.9rem; background: rgba(0,0,0,0.2);
+            border-left: 3px solid rgba(255,182,193,0.4); margin: 0.7rem 0;
+            border-radius: 0 8px 8px 0; animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .comment-time { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-bottom: 0.2rem; }
+        .comment-text { color: rgba(255,255,255,0.85); font-size: 0.9rem; line-height: 1.6; }
+        .comment-empty-hint {
+            color: rgba(255,255,255,0.3); text-align: center;
+            font-size: 0.85rem; padding: 1rem; font-style: italic;
+        }
+        
+        .footer {
+            background: #0d0d0d; padding: 3rem; text-align: center;
+            border-top: 1px solid rgba(255,182,193,0.1); position: relative; z-index: 1;
+        }
+        .footer-emoji { font-size: 1.3rem; margin-bottom: 0.8rem; }
+        .footer-text { color: rgba(255,255,255,0.3); font-size: 0.85rem; letter-spacing: 2px; }
+        .clear-comments-btn {
+            display: inline-block; margin-top: 1rem; color: rgba(255,255,255,0.18);
+            font-size: 0.7rem; cursor: pointer; background: none; border: none;
+            font-family: inherit; text-decoration: underline; text-underline-offset: 3px;
+            transition: color 0.3s;
+        }
+        .clear-comments-btn:hover { color: rgba(255,100,100,0.5); }
+        
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; letter-spacing: 5px; }
+            .hero-subtitle { font-size: 0.9rem; letter-spacing: 3px; }
+            .hero-float { display: none; }
+            .clover-container { bottom: 1.5rem; right: 1.2rem; }
+            .clover-main { width: 40px; height: 40px; font-size: 1.1rem; }
+            .clover-item { width: 34px; height: 34px; font-size: 1rem; }
+            .back-to-top { bottom: 1.5rem; right: 4.5rem; width: 40px; height: 40px; font-size: 1.1rem; }
+            .page-card { padding: 1.8rem 1.5rem 1.5rem; }
+            .section-label { font-size: 1.6rem; }
+            .entry-title { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <section class="hero-screen" id="home">
+        <div class="hero-float hero-float-1">🌸</div>
+        <div class="hero-float hero-float-2">☔</div>
+        <div class="hero-float hero-float-3">🕯️</div>
+        <div class="hero-float hero-float-4">🚢</div>
+        <h1 class="hero-title">你好哇</h1>
+        <p class="hero-subtitle">这里是灯塔与夜航船</p>
+        <div class="hero-scroll">↓ 向下探索 ↓</div>
+    </section>
+
+    <!-- 🌸 回到顶部 -->
+    <button class="back-to-top" id="backToTop" title="回到顶部">🌸</button>
+
+    <!-- ☘️ 可拖动 + 可隐藏 + 0.12% 🍀 -->
+    <div class="clover-container" id="cloverContainer">
+        <button class="clover-main" id="cloverMain" title="导航菜单 · 拖动 · 双击隐藏">☘️</button>
+        <div class="clover-menu" id="cloverMenu">
+            <a href="#section-books" class="clover-item" title="书籍">📚</a>
+            <a href="#section-films" class="clover-item" title="电影">🎬</a>
+            <a href="#section-music" class="clover-item" title="音乐">🎵</a>
+            <a href="#section-games" class="clover-item" title="游戏">🎮</a>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <div class="page-card" id="section-books">
+            <h2 class="section-label">📚 挪威的森林</h2>
+            <div class="entry-block">
+                <img class="entry-image" src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600" alt="书">
+                <h3 class="entry-title">《挪威的森林》</h3>
+                <p class="entry-quote">"死不是生的对立面，而是作为生的一部分永存。"</p>
+                <p class="entry-text">村上的文字像一场绵长的雨，落在青春的肩头。直子的纯净与绿子的热烈，恰似生命中无法割舍的两面。每个人都曾在某片森林里迷过路，寻找属于自己的出口。</p>
+            </div>
+            <div class="entry-block">
+                <img class="entry-image" src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=600" alt="书架">
+                <h3 class="entry-title">《人间失格》</h3>
+                <p class="entry-quote">"生而为人，我很抱歉。"</p>
+                <p class="entry-text">太宰治笔下的叶藏，是一面镜子，照见每个人内心深处那份不愿示人的脆弱与恐惧。读这本书的时候，常常会停下来，觉得被什么东西轻轻刺了一下。</p>
+            </div>
+        </div>
+
+        <div class="page-card" id="section-films">
+            <h2 class="section-label">🎬 撑红伞的少女</h2>
+            <div class="entry-block">
+                <img class="entry-image" src="https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=600" alt="红伞">
+                <h3 class="entry-title">《情书》</h3>
+                <p class="entry-quote">"你好吗？我很好。"</p>
+                <p class="entry-text">岩井俊二用一封寄往天国的信，打开了青春记忆的闸门。漫天飞雪中，渡边博子对着雪山呼喊；图书馆的窗帘后，少年柏原崇的身影至今令人心动。</p>
+            </div>
+        </div>
+
+        <div class="page-card" id="section-music">
+            <h2 class="section-label">🎵 晚风入耳</h2>
+            <div class="entry-block music-entry">
+                <div class="entry-image-wrap">
+                    <img class="entry-image" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600" alt="音乐">
+                </div>
+                <h3 class="entry-title">挪威的森林 — 伍佰</h3>
+                <p class="entry-quote">"那里湖面总是澄清，那里空气充满宁静。"</p>
+                <p class="entry-text">伍佰的声音像陈年的酒，带着故事和沧桑。听他的歌，总能想起某个深夜——窗外有风，杯中有水，心中有一个人。</p>
+            </div>
+        </div>
+
+        <div class="page-card" id="section-games">
+            <h2 class="section-label">🎮 温柔的游戏</h2>
+            <div class="entry-block game-entry">
+                <div class="entry-image-wrap">
+                    <img class="entry-image" src="https://images.unsplash.com/photo-1533230370300-1b9734c9b518?w=600" alt="游戏">
+                </div>
+                <h3 class="entry-title">《风之旅人》</h3>
+                <p class="entry-quote">"我们不必相识，只要同行一段。"</p>
+                <p class="entry-text">没有对话，没有胜负，只有沙漠、风与光。遇见陌生人，一起走过一段路，不必知道名字，也足够温暖。像一场安静的梦。</p>
+            </div>
+        </div>
+
+        <div class="page-card about-card">
+            <img class="about-avatar" src="https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=500" alt="我">
+            <h2 class="section-label" style="display:block;text-align:center;">关于我</h2>
+            <p class="entry-text" style="text-align:center;">
+                我是那个喜欢在雨天发呆的人，<br>
+                喜欢读村上的书，听伍佰的歌，<br>
+                喜欢安静的游戏与温柔的时光。<br><br>
+                这个网站是我的私人角落，存放着我喜欢的一切。<br>
+                如果你也喜欢这些，那我们大概会成为朋友。
+            </p>
+            <div class="comments-section">
+                <h3 class="comments-heading">💬 说点什么吧</h3>
+                <div class="comment-section" data-id="main-comments">
+                    <textarea class="comment-input" placeholder="写下你想说的话..."></textarea>
+                    <button class="comment-btn">发布留言</button>
+                    <div class="comment-list"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-emoji">🌸 🚢 ☔ 📚</div>
+        <p class="footer-text">你好哇 · 那些温柔的事物</p>
+        <button class="clear-comments-btn" id="clearAllComments">清空所有留言痕迹</button>
+    </footer>
+
+    <script>
+        // 图片淡入
+        document.querySelectorAll('img').forEach(img => {
+            if (img.complete && img.naturalWidth > 0) img.classList.add('loaded');
+            else img.addEventListener('load', () => img.classList.add('loaded'));
+        });
+        
+        // 🌸 回到顶部
+        document.getElementById('backToTop').addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // ============ ☘️ 全部功能 ============
+        const cloverContainer = document.getElementById('cloverContainer');
+        const cloverMain = document.getElementById('cloverMain');
+        const cloverMenu = document.getElementById('cloverMenu');
+        
+        let menuOpen = false;
+        let isHidden = false;
+        
+        // --- 菜单展开/收起 ---
+        cloverMain.addEventListener('click', (e) => {
+            // 如果正在拖动，不触发点击
+            if (dragMoved) return;
+            
+            e.stopPropagation();
+            
+            // 🍀 0.12% 幸运概率
+            if (Math.random() < 0.0012) {
+                triggerLucky();
+            }
+            
+            menuOpen = !menuOpen;
+            if (menuOpen) {
+                cloverMenu.classList.add('open');
+                cloverMain.classList.add('active');
+            } else {
+                cloverMenu.classList.remove('open');
+                cloverMain.classList.remove('active');
+            }
+        });
+        
+        // 🍀 幸运触发
+        function triggerLucky() {
+            cloverMain.textContent = '🍀';
+            cloverMain.classList.add('lucky');
+            
+            // 弹窗
+            const toast = document.createElement('div');
+            toast.textContent = '🍀 今天是幸运的一天！';
+            toast.style.cssText = `
+                position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
+                background:rgba(30,30,30,0.95); border:1px solid rgba(120,255,160,0.6);
+                color:#7effa0; padding:1rem 2rem; border-radius:30px;
+                font-size:1.2rem; z-index:10000; pointer-events:none;
+                font-family:"Ma Shan Zheng",cursive; letter-spacing:2px;
+                backdrop-filter:blur(10px);
+                animation:luckyToast 2.5s ease-out forwards;
+            `;
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes luckyToast {
+                    0% { transform:translate(-50%,-50%) scale(0); opacity:0; }
+                    15% { transform:translate(-50%,-50%) scale(1.1); opacity:1; }
+                    25% { transform:translate(-50%,-50%) scale(1); opacity:1; }
+                    80% { opacity:0.8; }
+                    100% { transform:translate(-50%,-50%) scale(0.8); opacity:0; }
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+                style.remove();
+            }, 2600);
+            
+            setTimeout(() => {
+                cloverMain.textContent = '☘️';
+                cloverMain.classList.remove('lucky');
+            }, 2500);
+        }
+        
+        // 点击菜单项关闭
+        cloverMenu.querySelectorAll('.clover-item').forEach(item => {
+            item.addEventListener('click', () => {
+                menuOpen = false;
+                cloverMenu.classList.remove('open');
+                cloverMain.classList.remove('active');
+            });
+        });
+        
+        // 点击其他地方关闭
+        document.addEventListener('click', (e) => {
+            if (menuOpen && !e.target.closest('#cloverContainer')) {
+                menuOpen = false;
+                cloverMenu.classList.remove('open');
+                cloverMain.classList.remove('active');
+            }
+        });
+        
+        // --- 拖动功能 ---
+        let isDragging = false;
+        let dragMoved = false;
+        let startMouseX, startMouseY, startLeft, startTop;
+        
+        function getContainerPos() {
+            const rect = cloverContainer.getBoundingClientRect();
+            return { left: rect.left, top: rect.top };
+        }
+        
+        cloverContainer.addEventListener('mousedown', (e) => {
+            if (!e.target.closest('#cloverMain')) return;
+            isDragging = true;
+            dragMoved = false;
+            cloverContainer.classList.add('dragging');
+            
+            const pos = getContainerPos();
+            startMouseX = e.clientX;
+            startMouseY = e.clientY;
+            startLeft = pos.left;
+            startTop = pos.top;
+            
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const dx = e.clientX - startMouseX;
+            const dy = e.clientY - startMouseY;
+            
+            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+                dragMoved = true;
+            }
+            
+            let newLeft = startLeft + dx;
+            let newTop = startTop + dy;
+            
+            const rect = cloverContainer.getBoundingClientRect();
+            newLeft = Math.max(5, Math.min(newLeft, window.innerWidth - rect.width - 5));
+            newTop = Math.max(5, Math.min(newTop, window.innerHeight - rect.height - 5));
+            
+            cloverContainer.style.right = 'auto';
+            cloverContainer.style.bottom = 'auto';
+            cloverContainer.style.left = newLeft + 'px';
+            cloverContainer.style.top = newTop + 'px';
+            
+            // 拖动时关闭菜单
+            if (menuOpen) {
+                menuOpen = false;
+                cloverMenu.classList.remove('open');
+                cloverMain.classList.remove('active');
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                cloverContainer.classList.remove('dragging');
+                // 延迟重置，防止拖动结束后立即触发 click
+                setTimeout(() => { dragMoved = false; }, 50);
+            }
+        });
+        
+        // 触摸事件
+        cloverContainer.addEventListener('touchstart', (e) => {
+            if (!e.target.closest('#cloverMain')) return;
+            isDragging = true;
+            dragMoved = false;
+            cloverContainer.classList.add('dragging');
+            
+            const pos = getContainerPos();
+            startMouseX = e.touches[0].clientX;
+            startMouseY = e.touches[0].clientY;
+            startLeft = pos.left;
+            startTop = pos.top;
+        }, { passive: false });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            const dx = e.touches[0].clientX - startMouseX;
+            const dy = e.touches[0].clientY - startMouseY;
+            
+            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+                dragMoved = true;
+            }
+            
+            let newLeft = startLeft + dx;
+            let newTop = startTop + dy;
+            
+            const rect = cloverContainer.getBoundingClientRect();
+            newLeft = Math.max(5, Math.min(newLeft, window.innerWidth - rect.width - 5));
+            newTop = Math.max(5, Math.min(newTop, window.innerHeight - rect.height - 5));
+            
+            cloverContainer.style.right = 'auto';
+            cloverContainer.style.bottom = 'auto';
+            cloverContainer.style.left = newLeft + 'px';
+            cloverContainer.style.top = newTop + 'px';
+            
+            if (menuOpen) {
+                menuOpen = false;
+                cloverMenu.classList.remove('open');
+                cloverMain.classList.remove('active');
+            }
+            
+            e.preventDefault();
+        }, { passive: false });
+        
+        document.addEventListener('touchend', () => {
+            if (isDragging) {
+                isDragging = false;
+                cloverContainer.classList.remove('dragging');
+                setTimeout(() => { dragMoved = false; }, 50);
+            }
+        });
+        
+        // --- 双击隐藏/显示 ---
+        cloverMain.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            dragMoved = true; // 阻止后续 click
+            
+            isHidden = !isHidden;
+            if (isHidden) {
+                cloverContainer.classList.add('hidden-state');
+                cloverMenu.classList.remove('open');
+                cloverMain.classList.remove('active');
+                menuOpen = false;
+            } else {
+                cloverContainer.classList.remove('hidden-state');
+            }
+        });
+        
+        // ============ 留言功能 ============
+        function formatCommentText(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML.replace(/\n/g, '<br>');
+        }
+        function getCommentKey(id) { return 'comment-' + id; }
+        function showEmptyHint(list) {
+            const old = list.querySelector('.comment-empty-hint');
+            if (old) old.remove();
+            const hint = document.createElement('div');
+            hint.className = 'comment-empty-hint';
+            hint.textContent = '这里很安静，说点什么吧...';
+            list.appendChild(hint);
+        }
+        function appendCommentItem(list, time, text, animate) {
+            const old = list.querySelector('.comment-empty-hint');
+            if (old) old.remove();
+            const item = document.createElement('div');
+            item.className = 'comment-item';
+            item.innerHTML = `<div class="comment-time">${time}</div><div class="comment-text">${formatCommentText(text)}</div>`;
+            list.appendChild(item);
+            if (animate) item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        function saveComment(id, text) {
+            const key = getCommentKey(id);
+            let comments = JSON.parse(localStorage.getItem(key) || '[]');
+            comments.push({ text, time: new Date().toLocaleString('zh-CN', { year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit' }) });
+            localStorage.setItem(key, JSON.stringify(comments));
+        }
+        function loadComments() {
+            document.querySelectorAll('.comment-section').forEach(section => {
+                const id = section.dataset.id;
+                const saved = localStorage.getItem(getCommentKey(id));
+                const list = section.querySelector('.comment-list');
+                list.innerHTML = '';
+                if (saved && JSON.parse(saved).length > 0) {
+                    JSON.parse(saved).forEach(c => appendCommentItem(list, c.time, c.text, false));
+                } else {
+                    showEmptyHint(list);
+                }
+            });
+        }
+        
+        document.querySelectorAll('.comment-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const section = this.closest('.comment-section');
+                const input = section.querySelector('.comment-input');
+                const text = input.value.trim();
+                if (!text) { input.focus(); return; }
+                const now = new Date().toLocaleString('zh-CN', { year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit' });
+                saveComment(section.dataset.id, text);
+                appendCommentItem(section.querySelector('.comment-list'), now, text, true);
+                input.value = '';
+                this.classList.add('success');
+                setTimeout(() => this.classList.remove('success'), 1800);
+            });
+        });
+        
+        document.getElementById('clearAllComments').addEventListener('click', () => {
+            if (confirm('确定要清空所有留言痕迹吗？此操作不可撤销。')) {
+                const keys = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    if (localStorage.key(i).startsWith('comment-')) keys.push(localStorage.key(i));
+                }
+                keys.forEach(k => localStorage.removeItem(k));
+                loadComments();
+            }
+        });
+        
+        loadComments();
+    </script>
+</body>
+</html>
