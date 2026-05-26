@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>你好哇 · 那些温柔的事物</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap');
+        /* 修复1：Google Fonts 换用国内可访问的镜像源 */
+        @import url('https://fonts.loli.net/css2?family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap');
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
         
-        /* 针对减少动画偏好的用户 */
         @media (prefers-reduced-motion: reduce) {
             * {
                 animation-duration: 0.01ms !important;
@@ -51,18 +51,23 @@
             background: linear-gradient(180deg, #1a1a1a 0%, #2d1f2f 50%, #1a1a1a 100%);
             overflow: hidden; z-index: 10;
         }
+
+        /* 漂浮图标：纯装饰，不可交互 */
         .hero-float {
             position: absolute; opacity: 0.12;
-            animation: heroFloat 6s ease-in-out infinite; pointer-events: none;
+            animation: heroFloat 8s ease-in-out infinite;
+            pointer-events: none; /* 修复：不可拖动，避免全局事件污染和手机滚动失效 */
+            user-select: none;
         }
-        .hero-float-1 { top: 12%; left: 10%; font-size: 4rem; }
-        .hero-float-2 { top: 18%; right: 12%; font-size: 3rem; animation-delay: 1.2s; }
-        .hero-float-3 { bottom: 22%; left: 8%; font-size: 2.5rem; animation-delay: 2.4s; }
-        .hero-float-4 { bottom: 16%; right: 14%; font-size: 3.5rem; animation-delay: 3.6s; }
+        .hero-float-1 { top: 12%; left: 10%; font-size: 4rem; animation-delay: 0s; }
+        .hero-float-2 { top: 18%; right: 12%; font-size: 3rem; animation-delay: 1.5s; }
+        .hero-float-3 { bottom: 22%; left: 8%; font-size: 2.5rem; animation-delay: 3s; }
+        .hero-float-4 { bottom: 16%; right: 14%; font-size: 3.5rem; animation-delay: 4.5s; }
+        .hero-float-5 { top: 40%; left: 15%; font-size: 3rem; animation-delay: 6s; }
         
         @keyframes heroFloat {
             0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-22px) rotate(4deg); }
+            50% { transform: translateY(-18px) rotate(3deg); }
         }
         
         .hero-title {
@@ -84,8 +89,8 @@
         }
         .hero-scroll {
             position: absolute; bottom: 3rem; left: 50%; transform: translateX(-50%);
-            color: rgba(255,182,193,0.5); font-size: 0.85rem; letter-spacing: 2px;
-            animation: bounce 2s infinite; z-index: 2;
+            color: rgba(255,182,193,0.4); font-size: 1rem; letter-spacing: 4px;
+            animation: bounce 2s infinite; z-index: 2; user-select: none;
         }
         @keyframes bounce {
             0%, 100% { transform: translateX(-50%) translateY(0); }
@@ -126,9 +131,7 @@
             order: 1;
             -webkit-tap-highlight-color: transparent;
         }
-        .clover-main:active {
-            cursor: grabbing;
-        }
+        .clover-main:active { cursor: grabbing; }
         .clover-main:hover {
             transform: scale(1.08);
             box-shadow: 0 0 30px rgba(255,182,193,0.35);
@@ -137,7 +140,6 @@
             background: rgba(255,182,193,0.25); border-color: #fff; color: #fff;
         }
         
-        /* 🍀 幸运四叶草动画 */
         .clover-main.lucky {
             animation: luckyPulse 0.6s ease-out;
         }
@@ -155,7 +157,8 @@
             order: 2;
         }
         .clover-menu.open {
-            max-height: 280px; opacity: 1;
+            max-height: 340px; /* 修复：增加高度以容纳新增的"关于"按钮 */
+            opacity: 1;
             padding-top: 0.8rem; pointer-events: auto;
         }
         
@@ -178,7 +181,6 @@
             box-shadow: 0 0 22px rgba(255,182,193,0.3);
         }
         
-        /* 拖动时样式 */
         .clover-container.dragging {
             opacity: 0.85;
             user-select: none;
@@ -190,7 +192,7 @@
         
         /* ============ 🌸 回到顶部 ============ */
         .back-to-top {
-            position: fixed; bottom: 2rem; right: 6rem;
+            position: fixed; bottom: 2rem; left: 2rem; /* 修复：移至左侧，避免与右侧clover触摸区重叠 */
             width: 48px; height: 48px; border-radius: 50%;
             background: rgba(26,26,26,0.9);
             border: 1.5px solid rgba(255,182,193,0.45);
@@ -201,7 +203,13 @@
             box-shadow: 0 3px 15px rgba(0,0,0,0.35);
             transition: all 0.3s ease;
             z-index: 999;
+            opacity: 0;
+            pointer-events: none;
             -webkit-tap-highlight-color: transparent;
+        }
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: auto;
         }
         .back-to-top:hover {
             background: rgba(255,182,193,0.2); border-color: #ffb6c1;
@@ -280,6 +288,7 @@
         .game-entry .entry-image {
             margin-bottom: 0; border: none; border-radius: 0;
             animation: slowZoom 14s ease-in-out infinite;
+            will-change: transform; /* 修复：提升合成层，减少重绘 */
         }
         @keyframes slowZoom {
             0%, 100% { transform: scale(1); }
@@ -292,7 +301,12 @@
             border: 3px solid rgba(255,182,193,0.25);
             box-shadow: 0 0 30px rgba(255,182,193,0.1); margin-bottom: 1.5rem;
         }
-        
+        .about-section-label {
+            display: block; text-align: center; font-family: 'Ma Shan Zheng', cursive;
+            font-size: 2rem; color: #fff; margin-bottom: 1.5rem; letter-spacing: 3px;
+            padding-bottom: 0.4rem; border-bottom: 2px solid rgba(255,182,193,0.2);
+        }
+
         .comments-section {
             margin-top: 2rem; padding-top: 2rem;
             border-top: 1px dashed rgba(255,255,255,0.1);
@@ -309,6 +323,10 @@
         }
         .comment-input:focus { outline: none; border-color: #ffb6c1; }
         .comment-input::placeholder { color: rgba(255,255,255,0.35); }
+        .comment-hint {
+            font-size: 0.78rem; color: rgba(255,255,255,0.28);
+            margin-bottom: 0.6rem; letter-spacing: 1px;
+        }
         .comment-btn {
             background: linear-gradient(135deg, #ffb6c1, #d4a5a5);
             color: #2d2d2d; border: none; padding: 0.6rem 2rem; border-radius: 25px;
@@ -334,6 +352,16 @@
             color: rgba(255,255,255,0.3); text-align: center;
             font-size: 0.85rem; padding: 1rem; font-style: italic;
         }
+        .comment-limit-hint {
+            font-size: 0.75rem; color: rgba(255,182,193,0.45);
+            text-align: right; margin-top: 0.3rem;
+        }
+        
+        /* Giscus 评论区 */
+        .giscus-wrap {
+            margin-top: 2rem; padding-top: 2rem;
+            border-top: 1px dashed rgba(255,255,255,0.08);
+        }
         
         .footer {
             background: #0d0d0d; padding: 3rem; text-align: center;
@@ -349,7 +377,6 @@
         }
         .clear-comments-btn:hover { color: rgba(255,100,100,0.5); }
         
-        /* 隐藏提示样式 */
         .hidden-hint {
             position: absolute;
             bottom: -25px;
@@ -361,18 +388,15 @@
             transition: opacity 0.2s;
             pointer-events: none;
         }
-        .clover-container:hover .hidden-hint {
-            opacity: 1;
-        }
+        .clover-container:hover .hidden-hint { opacity: 1; }
         
         @media (max-width: 768px) {
             .hero-title { font-size: 2.5rem; letter-spacing: 5px; }
             .hero-subtitle { font-size: 0.9rem; letter-spacing: 3px; }
-            .hero-float { display: none; }
             .clover-container { bottom: 1rem; right: 1rem; }
             .clover-main { width: 48px; height: 48px; font-size: 1.3rem; }
             .clover-item { width: 42px; height: 42px; font-size: 1.15rem; }
-            .back-to-top { bottom: 1rem; right: 4.5rem; width: 44px; height: 44px; font-size: 1.2rem; }
+            .back-to-top { bottom: 1rem; left: 1rem; width: 44px; height: 44px; font-size: 1.2rem; }
             .page-card { padding: 1.8rem 1.5rem 1.5rem; }
             .section-label { font-size: 1.6rem; }
             .entry-title { font-size: 1.2rem; }
@@ -383,41 +407,54 @@
 <body>
 
     <section class="hero-screen" id="home">
-        <div class="hero-float hero-float-1">🌸</div>
-        <div class="hero-float hero-float-2">☔</div>
-        <div class="hero-float hero-float-3">🕯️</div>
-        <div class="hero-float hero-float-4">🚢</div>
+        <!-- 修复：aria-hidden 避免屏幕阅读器读出装饰性emoji -->
+        <div class="hero-float hero-float-1" aria-hidden="true">🌸</div>
+        <div class="hero-float hero-float-2" aria-hidden="true">☔</div>
+        <div class="hero-float hero-float-3" aria-hidden="true">🧸</div>
+        <div class="hero-float hero-float-4" aria-hidden="true">🚢</div>
+        <div class="hero-float hero-float-5" aria-hidden="true">🗼</div>
         <h1 class="hero-title">你好哇</h1>
         <p class="hero-subtitle">这里是灯塔与夜航船</p>
-        <div class="hero-scroll">↓ 向下探索 ↓</div>
+        <!-- 修复：更诗意的文案 -->
+        <div class="hero-scroll" aria-hidden="true">↓</div>
     </section>
 
-    <!-- 🌸 回到顶部 -->
-    <button class="back-to-top" id="backToTop" title="回到顶部">🌸</button>
+    <!-- 🌸 回到顶部：移至左侧，避免与右侧clover重叠 -->
+    <button class="back-to-top" id="backToTop" title="回到顶部" aria-label="回到顶部">🌸</button>
 
-    <!-- ☘️ 可拖动 + 可隐藏 + 幸运四叶草 -->
+    <!-- ☘️ 导航：新增aria属性 + "关于我"入口 -->
     <div class="clover-container" id="cloverContainer">
-        <button class="clover-main" id="cloverMain" title="导航菜单 · 拖动 · 双击隐藏">☘️</button>
-        <div class="clover-menu" id="cloverMenu">
+        <button
+            class="clover-main"
+            id="cloverMain"
+            title="导航菜单 · 拖动 · 双击隐藏"
+            aria-label="导航菜单"
+            aria-expanded="false"
+            aria-controls="cloverMenu"
+        >☘️</button>
+        <nav class="clover-menu" id="cloverMenu" aria-label="页面导航">
             <a href="#section-books" class="clover-item" title="书籍">📚</a>
             <a href="#section-films" class="clover-item" title="电影">🎬</a>
             <a href="#section-music" class="clover-item" title="音乐">🎵</a>
             <a href="#section-games" class="clover-item" title="游戏">🎮</a>
-        </div>
-        <div class="hidden-hint">双击隐藏/显示</div>
+            <!-- 修复：新增"关于我"导航入口 -->
+            <a href="#section-about" class="clover-item" title="关于我">🪐</a>
+        </nav>
+        <div class="hidden-hint" aria-hidden="true">双击隐藏/显示</div>
     </div>
 
     <main class="main-content">
         <article class="page-card" id="section-books">
             <h2 class="section-label">📚 挪威的森林</h2>
             <div class="entry-block">
-                <img class="entry-image" src="https://picsum.photos/id/104/600/400" alt="书">
+                <!-- 修复：添加 loading="lazy" 和 width/height，减少CLS -->
+                <img class="entry-image" src="https://picsum.photos/id/104/600/400" alt="书" width="600" height="400" loading="lazy">
                 <h3 class="entry-title">《挪威的森林》</h3>
                 <p class="entry-quote">"死不是生的对立面，而是作为生的一部分永存。"</p>
                 <p class="entry-text">村上的文字像一场绵长的雨，落在青春的肩头。直子的纯净与绿子的热烈，恰似生命中无法割舍的两面。每个人都曾在某片森林里迷过路，寻找属于自己的出口。</p>
             </div>
             <div class="entry-block">
-                <img class="entry-image" src="https://picsum.photos/id/20/600/400" alt="书架">
+                <img class="entry-image" src="https://picsum.photos/id/20/600/400" alt="书架" width="600" height="400" loading="lazy">
                 <h3 class="entry-title">《人间失格》</h3>
                 <p class="entry-quote">"生而为人，我很抱歉。"</p>
                 <p class="entry-text">太宰治笔下的叶藏，是一面镜子，照见每个人内心深处那份不愿示人的脆弱与恐惧。读这本书的时候，常常会停下来，觉得被什么东西轻轻刺了一下。</p>
@@ -427,7 +464,7 @@
         <article class="page-card" id="section-films">
             <h2 class="section-label">🎬 撑红伞的少女</h2>
             <div class="entry-block">
-                <img class="entry-image" src="https://picsum.photos/id/96/600/400" alt="红伞">
+                <img class="entry-image" src="https://picsum.photos/id/96/600/400" alt="红伞" width="600" height="400" loading="lazy">
                 <h3 class="entry-title">《情书》</h3>
                 <p class="entry-quote">"你好吗？我很好。"</p>
                 <p class="entry-text">岩井俊二用一封寄往天国的信，打开了青春记忆的闸门。漫天飞雪中，渡边博子对着雪山呼喊；图书馆的窗帘后，少年柏原崇的身影至今令人心动。</p>
@@ -438,7 +475,7 @@
             <h2 class="section-label">🎵 晚风入耳</h2>
             <div class="entry-block music-entry">
                 <div class="entry-image-wrap">
-                    <img class="entry-image" src="https://picsum.photos/id/29/600/400" alt="音乐">
+                    <img class="entry-image" src="https://picsum.photos/id/29/600/400" alt="音乐" width="600" height="400" loading="lazy">
                 </div>
                 <h3 class="entry-title">挪威的森林 — 伍佰</h3>
                 <p class="entry-quote">"那里湖面总是澄清，那里空气充满宁静。"</p>
@@ -450,7 +487,7 @@
             <h2 class="section-label">🎮 温柔的游戏</h2>
             <div class="entry-block game-entry">
                 <div class="entry-image-wrap">
-                    <img class="entry-image" src="https://picsum.photos/id/1/600/400" alt="游戏">
+                    <img class="entry-image" src="https://picsum.photos/id/1/600/400" alt="游戏" width="600" height="400" loading="lazy">
                 </div>
                 <h3 class="entry-title">《风之旅人》</h3>
                 <p class="entry-quote">"我们不必相识，只要同行一段。"</p>
@@ -459,8 +496,9 @@
         </article>
 
         <article class="page-card about-card" id="section-about">
-            <img class="about-avatar" src="https://picsum.photos/id/64/200/200" alt="我">
-            <h2 class="section-label" style="display:block;text-align:center;">关于我</h2>
+            <img class="about-avatar" src="https://picsum.photos/id/64/200/200" alt="我的头像" width="200" height="200" loading="lazy">
+            <!-- 修复：用独立class替代inline style -->
+            <h2 class="about-section-label">关于我</h2>
             <p class="entry-text" style="text-align:center;">
                 我是那个喜欢在雨天发呆的人，<br>
                 喜欢读村上的书，听伍佰的歌，<br>
@@ -471,74 +509,100 @@
             <div class="comments-section">
                 <h3 class="comments-heading">💬 说点什么吧</h3>
                 <div class="comment-section" data-id="main-comments">
-                    <textarea class="comment-input" placeholder="写下你想说的话..."></textarea>
+                    <textarea class="comment-input" placeholder="写下你想说的话..." aria-label="留言输入框"></textarea>
+                    <!-- 修复：提示 Ctrl+Enter 快捷键 -->
+                    <p class="comment-hint">Ctrl + Enter 快速发送</p>
                     <button class="comment-btn">发布留言</button>
-                    <div class="comment-list"></div>
+                    <div class="comment-list" aria-live="polite"></div>
                 </div>
+            </div>
+            <!-- 修复：Giscus 挂载容器 -->
+            <div class="giscus-wrap">
+                <div class="giscus"></div>
             </div>
         </article>
     </main>
 
     <footer class="footer">
-        <div class="footer-emoji">🌸 🚢 ☔ 📚</div>
+        <div class="footer-emoji" aria-hidden="true">🌸 🚢 ☔ 📚</div>
         <p class="footer-text">你好哇 · 那些温柔的事物</p>
         <button class="clear-comments-btn" id="clearAllComments">清空所有留言痕迹</button>
     </footer>
 
     <script>
-        // 图片淡入
+        // ============ 图片淡入 ============
         document.querySelectorAll('img').forEach(img => {
             if (img.complete && img.naturalWidth > 0) img.classList.add('loaded');
             else img.addEventListener('load', () => img.classList.add('loaded'));
         });
-        
-        // 🌸 回到顶部
+
+        // ============ 🌸 回到顶部（滚动后才显示） ============
         const backToTop = document.getElementById('backToTop');
         if (backToTop) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > window.innerHeight * 0.5) {
+                    backToTop.classList.add('visible');
+                } else {
+                    backToTop.classList.remove('visible');
+                }
+            }, { passive: true });
             backToTop.addEventListener('click', () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         }
-        
+
         // ============ ☘️ 全部功能 ============
         const cloverContainer = document.getElementById('cloverContainer');
         const cloverMain = document.getElementById('cloverMain');
         const cloverMenu = document.getElementById('cloverMenu');
-        
+
         let menuOpen = false;
         let isHidden = false;
-        
-        // --- 菜单展开/收起 ---
+
+        // --- 单双击区分（用定时器避免移动端双击引起菜单状态混乱）---
+        let clickTimer = null;
+        let clickCount = 0;
+
         if (cloverMain) {
             cloverMain.addEventListener('click', (e) => {
-                // 如果正在拖动，不触发点击
                 if (dragMoved) return;
-                
                 e.stopPropagation();
-                
-                // 🍀 幸运概率改为O.12% 让更多用户能触发
-                if (Math.random() < 0.0012) {
-                    triggerLucky();
-                }
-                
-                menuOpen = !menuOpen;
-                if (menuOpen) {
-                    cloverMenu.classList.add('open');
-                    cloverMain.classList.add('active');
-                } else {
-                    cloverMenu.classList.remove('open');
-                    cloverMain.classList.remove('active');
+                clickCount++;
+                if (clickCount === 1) {
+                    clickTimer = setTimeout(() => {
+                        // 单击：切换菜单
+                        if (Math.random() < 0.0012) triggerLucky();
+                        menuOpen = !menuOpen;
+                        cloverMenu.classList.toggle('open', menuOpen);
+                        cloverMain.classList.toggle('active', menuOpen);
+                        cloverMain.setAttribute('aria-expanded', menuOpen ? 'true' : 'false');
+                        clickCount = 0;
+                    }, 260);
+                } else if (clickCount >= 2) {
+                    // 双击：隐藏/显示
+                    clearTimeout(clickTimer);
+                    clickCount = 0;
+                    dragMoved = true; // 阻止后续可能的click误触
+                    isHidden = !isHidden;
+                    if (isHidden) {
+                        cloverContainer.classList.add('hidden-state');
+                        cloverMenu.classList.remove('open');
+                        cloverMain.classList.remove('active');
+                        cloverMain.setAttribute('aria-expanded', 'false');
+                        menuOpen = false;
+                    } else {
+                        cloverContainer.classList.remove('hidden-state');
+                    }
+                    setTimeout(() => { dragMoved = false; }, 50);
                 }
             });
         }
-        
+
         // 🍀 幸运触发
         function triggerLucky() {
             if (!cloverMain) return;
             cloverMain.textContent = '🍀';
             cloverMain.classList.add('lucky');
-            
-            // 弹窗提示
             const toast = document.createElement('div');
             toast.textContent = '🍀 今天是幸运的一天！';
             toast.style.cssText = `
@@ -562,98 +626,84 @@
             `;
             document.head.appendChild(style);
             document.body.appendChild(toast);
-            
+            setTimeout(() => { toast.remove(); style.remove(); }, 2600);
             setTimeout(() => {
-                toast.remove();
-                style.remove();
-            }, 2600);
-            
-            setTimeout(() => {
-                if (cloverMain) {
-                    cloverMain.textContent = '☘️';
-                    cloverMain.classList.remove('lucky');
-                }
+                if (cloverMain) { cloverMain.textContent = '☘️'; cloverMain.classList.remove('lucky'); }
             }, 2500);
         }
-        
+
         // 点击菜单项关闭菜单
         if (cloverMenu) {
             cloverMenu.querySelectorAll('.clover-item').forEach(item => {
                 item.addEventListener('click', () => {
                     menuOpen = false;
                     cloverMenu.classList.remove('open');
-                    if (cloverMain) cloverMain.classList.remove('active');
+                    if (cloverMain) {
+                        cloverMain.classList.remove('active');
+                        cloverMain.setAttribute('aria-expanded', 'false');
+                    }
                 });
             });
         }
-        
+
         // 点击其他地方关闭菜单
         document.addEventListener('click', (e) => {
             if (menuOpen && cloverContainer && !e.target.closest('#cloverContainer')) {
                 menuOpen = false;
                 if (cloverMenu) cloverMenu.classList.remove('open');
-                if (cloverMain) cloverMain.classList.remove('active');
+                if (cloverMain) {
+                    cloverMain.classList.remove('active');
+                    cloverMain.setAttribute('aria-expanded', 'false');
+                }
             }
         });
-        
-        // --- 拖动功能 ---
+
+        // --- 拖动功能（修复坐标系：使用offsetLeft/offsetTop）---
         let isDragging = false;
         let dragMoved = false;
         let startMouseX, startMouseY, startLeft, startTop;
-        
-        function getContainerPos() {
-            if (!cloverContainer) return { left: 0, top: 0 };
-            const rect = cloverContainer.getBoundingClientRect();
-            return { left: rect.left, top: rect.top };
-        }
-        
+
         if (cloverContainer && cloverMain) {
             cloverContainer.addEventListener('mousedown', (e) => {
                 if (!e.target.closest('#cloverMain')) return;
                 isDragging = true;
                 dragMoved = false;
                 cloverContainer.classList.add('dragging');
-                
-                const pos = getContainerPos();
                 startMouseX = e.clientX;
                 startMouseY = e.clientY;
-                startLeft = pos.left;
-                startTop = pos.top;
-                
+                // 修复：从实际style或offsetLeft读取起始位置，避免坐标系混乱
+                startLeft = cloverContainer.style.left
+                    ? parseFloat(cloverContainer.style.left)
+                    : cloverContainer.getBoundingClientRect().left;
+                startTop = cloverContainer.style.top
+                    ? parseFloat(cloverContainer.style.top)
+                    : cloverContainer.getBoundingClientRect().top;
                 e.preventDefault();
             });
         }
-        
+
         document.addEventListener('mousemove', (e) => {
             if (!isDragging || !cloverContainer) return;
-            
             const dx = e.clientX - startMouseX;
             const dy = e.clientY - startMouseY;
-            
-            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
-                dragMoved = true;
-            }
-            
+            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragMoved = true;
             let newLeft = startLeft + dx;
             let newTop = startTop + dy;
-            
             const rect = cloverContainer.getBoundingClientRect();
             newLeft = Math.max(5, Math.min(newLeft, window.innerWidth - rect.width - 5));
             newTop = Math.max(5, Math.min(newTop, window.innerHeight - rect.height - 5));
-            
             cloverContainer.style.right = 'auto';
             cloverContainer.style.bottom = 'auto';
             cloverContainer.style.left = newLeft + 'px';
             cloverContainer.style.top = newTop + 'px';
-            
-            // 拖动时关闭菜单
             if (menuOpen && cloverMenu && cloverMain) {
                 menuOpen = false;
                 cloverMenu.classList.remove('open');
                 cloverMain.classList.remove('active');
+                cloverMain.setAttribute('aria-expanded', 'false');
             }
         });
-        
+
         document.addEventListener('mouseup', () => {
             if (isDragging) {
                 isDragging = false;
@@ -661,54 +711,48 @@
                 setTimeout(() => { dragMoved = false; }, 50);
             }
         });
-        
-        // 触摸事件
+
+        // 触摸拖动
         if (cloverContainer && cloverMain) {
             cloverContainer.addEventListener('touchstart', (e) => {
                 if (!e.target.closest('#cloverMain')) return;
                 isDragging = true;
                 dragMoved = false;
                 cloverContainer.classList.add('dragging');
-                
-                const pos = getContainerPos();
                 startMouseX = e.touches[0].clientX;
                 startMouseY = e.touches[0].clientY;
-                startLeft = pos.left;
-                startTop = pos.top;
-            }, { passive: false });
+                startLeft = cloverContainer.style.left
+                    ? parseFloat(cloverContainer.style.left)
+                    : cloverContainer.getBoundingClientRect().left;
+                startTop = cloverContainer.style.top
+                    ? parseFloat(cloverContainer.style.top)
+                    : cloverContainer.getBoundingClientRect().top;
+            }, { passive: true });
         }
-        
+
         document.addEventListener('touchmove', (e) => {
             if (!isDragging || !cloverContainer) return;
-            
             const dx = e.touches[0].clientX - startMouseX;
             const dy = e.touches[0].clientY - startMouseY;
-            
-            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
-                dragMoved = true;
-            }
-            
+            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragMoved = true;
             let newLeft = startLeft + dx;
             let newTop = startTop + dy;
-            
             const rect = cloverContainer.getBoundingClientRect();
             newLeft = Math.max(5, Math.min(newLeft, window.innerWidth - rect.width - 5));
             newTop = Math.max(5, Math.min(newTop, window.innerHeight - rect.height - 5));
-            
             cloverContainer.style.right = 'auto';
             cloverContainer.style.bottom = 'auto';
             cloverContainer.style.left = newLeft + 'px';
             cloverContainer.style.top = newTop + 'px';
-            
             if (menuOpen && cloverMenu && cloverMain) {
                 menuOpen = false;
                 cloverMenu.classList.remove('open');
                 cloverMain.classList.remove('active');
+                cloverMain.setAttribute('aria-expanded', 'false');
             }
-            
             e.preventDefault();
         }, { passive: false });
-        
+
         document.addEventListener('touchend', () => {
             if (isDragging) {
                 isDragging = false;
@@ -716,37 +760,17 @@
                 setTimeout(() => { dragMoved = false; }, 50);
             }
         });
-        
-        // --- 双击隐藏/显示 ---
-        if (cloverMain) {
-            cloverMain.addEventListener('dblclick', (e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                dragMoved = true;
-                
-                isHidden = !isHidden;
-                if (isHidden) {
-                    cloverContainer.classList.add('hidden-state');
-                    if (cloverMenu) cloverMenu.classList.remove('open');
-                    if (cloverMain) cloverMain.classList.remove('active');
-                    menuOpen = false;
-                } else {
-                    cloverContainer.classList.remove('hidden-state');
-                }
-            });
-        }
-        
+
         // ============ 留言功能 ============
+        const MAX_COMMENTS = 50; // 修复：限制最大留言条数
+
+        // 修复：安全的格式化函数，先escape再处理换行
         function formatCommentText(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML.replace(/\n/g, '<br>');
+            return escapeHtml(text).replace(/\n/g, '<br>');
         }
-        
-        function getCommentKey(id) { 
-            return 'comment-' + id; 
-        }
-        
+
+        function getCommentKey(id) { return 'comment-' + id; }
+
         function showEmptyHint(list) {
             if (!list) return;
             const old = list.querySelector('.comment-empty-hint');
@@ -756,35 +780,50 @@
             hint.textContent = '这里很安静，说点什么吧...';
             list.appendChild(hint);
         }
-        
+
         function appendCommentItem(list, time, text, animate) {
             if (!list) return;
             const old = list.querySelector('.comment-empty-hint');
             if (old) old.remove();
             const item = document.createElement('div');
             item.className = 'comment-item';
-            item.innerHTML = `<div class="comment-time">${escapeHtml(time)}</div><div class="comment-text">${formatCommentText(escapeHtml(text))}</div>`;
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'comment-time';
+            timeDiv.textContent = time;
+            const textDiv = document.createElement('div');
+            textDiv.className = 'comment-text';
+            // 安全：使用innerHTML只插入已经escape过的内容（仅含<br>）
+            textDiv.innerHTML = formatCommentText(text);
+            item.appendChild(timeDiv);
+            item.appendChild(textDiv);
             list.appendChild(item);
-            if (animate) item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (animate) item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-        
+
         function escapeHtml(str) {
             if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
-        
+
         function saveComment(id, text) {
             const key = getCommentKey(id);
             let comments = JSON.parse(localStorage.getItem(key) || '[]');
-            comments.push({ text: text, time: new Date().toLocaleString('zh-CN', { year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit' }) });
+            comments.push({
+                text: text,
+                time: new Date().toLocaleString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' })
+            });
+            // 修复：超出上限时截断旧数据
+            if (comments.length > MAX_COMMENTS) {
+                comments = comments.slice(-MAX_COMMENTS);
+            }
             localStorage.setItem(key, JSON.stringify(comments));
         }
-        
+
         function loadComments() {
             document.querySelectorAll('.comment-section').forEach(section => {
                 const id = section.dataset.id;
@@ -792,32 +831,58 @@
                 const list = section.querySelector('.comment-list');
                 if (!list) return;
                 list.innerHTML = '';
-                if (saved && JSON.parse(saved).length > 0) {
-                    JSON.parse(saved).forEach(c => appendCommentItem(list, c.time, c.text, false));
-                } else {
-                    showEmptyHint(list);
+                if (saved) {
+                    const arr = JSON.parse(saved);
+                    if (arr.length > 0) {
+                        arr.forEach(c => appendCommentItem(list, c.time, c.text, false));
+                        return;
+                    }
                 }
+                showEmptyHint(list);
             });
         }
-        
+
         document.querySelectorAll('.comment-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const section = this.closest('.comment-section');
-                const input = section.querySelector('.comment-input');
-                const text = input.value.trim();
-                if (!text) { 
-                    input.focus(); 
-                    return; 
-                }
-                const now = new Date().toLocaleString('zh-CN', { year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit' });
-                saveComment(section.dataset.id, text);
-                appendCommentItem(section.querySelector('.comment-list'), now, text, true);
-                input.value = '';
-                this.classList.add('success');
-                setTimeout(() => this.classList.remove('success'), 1800);
+            btn.addEventListener('click', function () {
+                submitComment(this);
             });
         });
-        
+
+        // 修复：Ctrl+Enter 快捷键提交
+        document.querySelectorAll('.comment-input').forEach(textarea => {
+            textarea.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    const btn = this.closest('.comment-section').querySelector('.comment-btn');
+                    if (btn) submitComment(btn);
+                }
+            });
+        });
+
+        function submitComment(btn) {
+            const section = btn.closest('.comment-section');
+            const input = section.querySelector('.comment-input');
+            const text = input.value.trim();
+            if (!text) { input.focus(); return; }
+            const now = new Date().toLocaleString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+            saveComment(section.dataset.id, text);
+            appendCommentItem(section.querySelector('.comment-list'), now, text, true);
+            input.value = '';
+            btn.classList.add('success');
+            setTimeout(() => btn.classList.remove('success'), 1800);
+            // 检查是否临近上限
+            const saved = JSON.parse(localStorage.getItem(getCommentKey(section.dataset.id)) || '[]');
+            if (saved.length >= MAX_COMMENTS - 5) {
+                let hint = section.querySelector('.comment-limit-hint');
+                if (!hint) {
+                    hint = document.createElement('p');
+                    hint.className = 'comment-limit-hint';
+                    section.querySelector('.comment-list').after(hint);
+                }
+                hint.textContent = `已保存 ${saved.length}/${MAX_COMMENTS} 条留言`;
+            }
+        }
+
         const clearBtn = document.getElementById('clearAllComments');
         if (clearBtn) {
             clearBtn.addEventListener('click', () => {
@@ -829,12 +894,16 @@
                     }
                     keys.forEach(k => localStorage.removeItem(k));
                     loadComments();
+                    document.querySelectorAll('.comment-limit-hint').forEach(el => el.remove());
                 }
             });
         }
-        
+
         loadComments();
-    </script><script src="https://giscus.app/client.js"
+    </script>
+
+    <!-- Giscus 评论组件（挂载到页面内 .giscus div） -->
+    <script src="https://giscus.app/client.js"
         data-repo="Lin060503/Lin060503.github.io"
         data-repo-id="R_kgDOSmWXUA"
         data-category="Announcements"
@@ -848,6 +917,6 @@
         data-lang="zh-CN"
         crossorigin="anonymous"
         async>
-</script>
+    </script>
 </body>
 </html>
